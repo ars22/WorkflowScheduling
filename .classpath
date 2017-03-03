@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="examples"/>
+	<classpathentry kind="src" path="sources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="C:/Users/Sri Ranga Sai/workspace/WorkflowSim-2.0-Local/lib/flanagan.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Sri Ranga Sai/workspace/WorkflowSim-2.0-Local/lib/jdom-2.0.0.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
