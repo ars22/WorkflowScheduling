@@ -99,7 +99,7 @@ public class WorkflowSimBasicExample1 {
             /**
              * Should change this based on real physical path
              */
-            String daxPath = "C:/Users/Sri Ranga Sai/workspace/WorkflowSim-2.0-Local/config/new_dax/CYBERSHAKE/CYBERSHAKE.n.100.11.dax";
+            String daxPath = "C:/Users/Sri Ranga Sai/workspace/WorkflowSim-2.0-Local/config/new_dax/CYBERSHAKE/CYBERSHAKE.n.700.11.dax";
             File daxFile = new File(daxPath);
             if (!daxFile.exists()) {
                 return;

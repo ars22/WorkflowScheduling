@@ -20,26 +20,29 @@ public class PSOMain extends BaseSchedulingAlgorithm{
 	Particle gbest;	
 	Particle[] particle;
 	int n;
-	int dim,res,deadline=500,iterations=100;
+	int dim,res,deadline=500,iterations=10;
 	WorkflowPlanner planner;
 	List<Task> taskList;
 	List<CondorVM> vmList;
+	static int c=0;
 	
 	
-	
-	public PSOMain(WorkflowPlanner P){
+	public PSOMain(){
 		super();
-		this.planner = P;
 	}
-	
 
 	@Override
 	public void run(){
 
 		
 		try {
-	
-		taskList = getCloudletList();
+			System.out.println("Here again : " + c);
+			
+		if (c==1)
+			return;
+		c=1;
+		
+		taskList = GlobalStatic.wfEngine.getJobsList();
 		vmList = getVmList();
 		n = taskList.size();
 		System.out.println("Task size :" + n);
@@ -53,6 +56,7 @@ public class PSOMain extends BaseSchedulingAlgorithm{
 		
 		for(int g=0;g<iterations;g++){
 			for(int i=0;i<n;i++){
+				
 				particle[i]=new Particle(dim, res);
 				//calculating fitness
 				s.Schedulejob(particle[i].pos,i);

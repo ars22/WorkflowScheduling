@@ -148,7 +148,7 @@ public class WorkflowScheduler extends DatacenterBroker {
         		algorithm = new org.workflowsim.scheduling.CPSO.CPSOMain();
         		break;
         	case PSO:
-        		algorithm = new org.workflowsim.scheduling.PSO.PSOMain(Parameters.wfPlanner);
+        		algorithm = new org.workflowsim.scheduling.PSO.PSOMain();
         		break;
         	case FCFS:
                 algorithm = new FCFSSchedulingAlgorithm();

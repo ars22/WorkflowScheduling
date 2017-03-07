@@ -289,7 +289,7 @@ public final class WorkflowEngine extends SimEntity {
                 List<Job> parentList = job.getParentList();
                 boolean flag = true;
                 for (Job parent : parentList) {
-                	System.out.println(parent.getCloudletId());
+                	//System.out.println(parent.getCloudletId());
                     if (!hasJobListContainsID(this.getJobsReceivedList(), parent.getCloudletId())) {
                         flag = false;
                         break;
@@ -300,7 +300,7 @@ public final class WorkflowEngine extends SimEntity {
                  * submit.
                  */
                 if (flag) {
-                	System.out.println("ppppppppppp"+allocationList.containsKey(job.getUserId())+"  "+job.getUserId());
+                	System.out.println("ppppppppppp"+job.getCloudletId());
                 	
                     List submittedList = allocationList.get(job.getUserId());
                     if (!job.dontSubmit){

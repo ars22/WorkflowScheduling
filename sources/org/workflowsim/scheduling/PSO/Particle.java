@@ -21,7 +21,6 @@ public class Particle {
 		LET=new int[res];
 		LST=new int[res];
 		m=new int[dim][3];
-		System.out.println("\n");
 		for(int j=0;j<dim;j++){
 			Random rand=new Random();
 			pos[j]= (int) Math.floor(Math.random()*res);

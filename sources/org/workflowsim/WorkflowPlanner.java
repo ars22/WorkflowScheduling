@@ -137,11 +137,12 @@ public final class WorkflowPlanner extends SimEntity {
             case WorkflowSimTags.START_SIMULATION:
                 getWorkflowParser().parse();
                 setTaskList(getWorkflowParser().getTaskList());
-                processPlanning();
                 processImpactFactors(getTaskList());
+                processPlanning();
             	System.out.println("***************************"+getTaskList().size()+(getTaskList().get(0) instanceof Job));
                 
                 sendNow(getClusteringEngineId(), WorkflowSimTags.JOB_SUBMIT, getTaskList());
+                
                 break;
             case CloudSimTags.END_OF_SIMULATION:
                 shutdownEntity();

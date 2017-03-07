@@ -314,6 +314,7 @@ public final class WorkflowParser {
             System.out.println("%%%%%%%%%%%%%" + taskList.size() + GlobalStatic.taskList.size() + "\n");
     		
 
+            
         } catch (JDOMException jde) {
             Log.printLine("JDOM Exception;Please make sure your dax file is valid");
 
