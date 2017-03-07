@@ -4,6 +4,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.awt.GraphicsConfigTemplate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -31,10 +32,10 @@ public class CPSOMain extends BaseSchedulingAlgorithm{
 	int dim,res,deadline=500,iterations=200;
 	WorkflowPlanner planner;
 	List<Task> taskList;
+	List<CondorVM> vmList;
 	TreeSet <CParticle> R;
 	int gbestSame;
-	int rSize;
-	
+	int rSize;	
 
 	@Override
 	public void run(){
@@ -42,9 +43,9 @@ public class CPSOMain extends BaseSchedulingAlgorithm{
 		
 		try {
 		if (c==1) return;
-		c = 1;
+		c = 1; 
 		taskList = GlobalStatic.wfEngine.getJobsList();
-		setCloudletList(taskList);
+		vmList = getVmList();
 		n = taskList.size();
 		dim = n;
 		res = getVmList().size();		
@@ -54,7 +55,7 @@ public class CPSOMain extends BaseSchedulingAlgorithm{
 		
 		R = new TreeSet<CParticle>(new MyComp());
 		
-		System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$ N is : " + n + (taskList.get(0) instanceof org.workflowsim.Job));
+		//System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$ N is : " + n + (taskList.get(0) instanceof org.workflowsim.Job));
 		
 		
 		gbestSame = 0;
@@ -63,12 +64,13 @@ public class CPSOMain extends BaseSchedulingAlgorithm{
 		if (rSize <=1 ) rSize += 2;
 		
 		gbestCopy = gbest;
+		CPSOScheduler s=new CPSOScheduler(this);
+		
 		
 		for(int g=0;g<iterations;g++){
 			for(int i=0;i<n;i++){
 				particle[i]=new CParticle(dim, res);
 				particle[i].id = i;
-				CPSOScheduler s=new CPSOScheduler(this);
 				//calculating fitness
 				s.Schedulejob(particle[i].pos,i);
 				//3.1
@@ -110,7 +112,7 @@ public class CPSOMain extends BaseSchedulingAlgorithm{
 				//System.out.println("pbest="+particle[i].pbestTEC);
 				//3.2
 				if(gbest.TEC > particle[i].pbestTEC){
-					System.out.println("gbest changing");
+					//System.out.println("gbest changing");
 					gbest=particle[i];
 					gbestCopy = gbest;
 					gbestSame = 0; 
@@ -141,7 +143,7 @@ public class CPSOMain extends BaseSchedulingAlgorithm{
 				}
 			
 				if (gbestCopy == gbest){
-					System.out.println("gbest is same !!!! " + gbest + gbestCopy + gbestSame);
+					//System.out.println("gbest is same !!!! " + gbest + gbestCopy + gbestSame);
 					gbestSame++;
 				}
 				else {
@@ -149,7 +151,7 @@ public class CPSOMain extends BaseSchedulingAlgorithm{
 				}
 				
 				if (gbestSame == 5 && n!=0){
-					System.out.println("Gbest hasnt changed for 20 iterations");
+					//System.out.println("Gbest hasnt changed for 20 iterations");
 					gbestSame = 0;
 					for (int h=0; h<n; h++){
 						if (R.size() < rSize){
@@ -160,22 +162,22 @@ public class CPSOMain extends BaseSchedulingAlgorithm{
 							R.add(particle[h]);
 						}
 					}
-					System.out.println("Worst 10% of the population have values : " + R.size());
+					//System.out.println("Worst 10% of the population have values : " + R.size());
 					for (CParticle cp : R){
 						int currentId = cp.id;
-						System.out.println("Id : " + currentId + "TEC : " + cp.pbestTEC);
-						System.out.println("Pos vector for particle with id "  + currentId);
+						//System.out.println("Id : " + currentId + "TEC : " + cp.pbestTEC);
+						//System.out.println("Pos vector for particle with id "  + currentId);
 						for(int f=0;f<dim;f++){
 							int val = (int) (100 * Math.random());
 							cp.pos[f] = (val%2) * res;
-							System.out.println(f +  " : " + cp.pos[f]);
+							//System.out.println(f +  " : " + cp.pos[f]);
 						}
 						particle[currentId] = cp;
 					}
 				}
 				
 			}
-		
+		System.out.println("gbest.TEC="+gbest.TEC);
 			for (int i=0; i<dim; i++){
 				Cloudlet cloudlet = (Cloudlet) taskList.get(i);
 				cloudlet.setVmId(gbest.pos[i]);

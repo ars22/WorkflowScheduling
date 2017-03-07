@@ -6,13 +6,18 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.cloudbus.cloudsim.Cloudlet;
+import org.cloudbus.cloudsim.Consts;
 import org.workflowsim.CondorVM;
 import org.workflowsim.FileItem;
 import org.workflowsim.Job;
 import org.workflowsim.Task;
 import org.workflowsim.WorkflowSimTags;
+import org.workflowsim.utils.Parameters;
 import org.workflowsim.utils.ReplicaCatalog;
 import org.workflowsim.scheduling.*;
 
@@ -25,6 +30,11 @@ public class CPSOScheduler {
 	
 	public CPSOScheduler(CPSOMain pso){
 		this.pso = pso;
+		this.averageBandwidth = calculateAverageBandwidth();
+		computationCosts = new HashMap<>();
+        transferCosts = new HashMap<>();
+		calculateComputationCosts();
+		calculateTransferCosts();
 	}
 	
 	int dim;
@@ -54,6 +64,96 @@ public class CPSOScheduler {
 	List<Integer> M;
 	List<Integer> parents;
 	List<Integer> children;
+	
+	double averageBandwidth;
+	
+	private Map<Task, Map<CondorVM, Double>> computationCosts;
+    private Map<Task, Map<Task, Double>> transferCosts;
+	
+    private void calculateComputationCosts() {
+    	//System.out.println("@@@@@@@@"+pso.taskList.size());
+        for (Task task : pso.taskList) {
+            Map<CondorVM, Double> costsVm = new HashMap<>();
+            for (Object vmObject : pso.vmList) {
+                CondorVM vm = (CondorVM) vmObject;
+                if (vm.getNumberOfPes() < task.getNumberOfPes()) {
+                    costsVm.put(vm, Double.MAX_VALUE);
+                } else {
+                    costsVm.put(vm,
+                            task.getCloudletTotalLength() / vm.getMips());
+                }
+            }
+            //System.out.println("id : "+task.getCloudletId()+" "+task.copyVal+"  "+costsVm);
+            computationCosts.put(task, costsVm);
+        }
+    }
+
+    /**
+     * Populates the transferCosts map with the time in seconds to transfer all
+     * files from each parent to each child
+     */
+    private void calculateTransferCosts() {
+        // Initializing the matrix
+        for (Task task1 : pso.taskList) {
+            Map<Task, Double> taskTransferCosts = new HashMap<>();
+            for (Task task2 : pso.taskList) {
+                taskTransferCosts.put(task2, 0.0);
+            }
+            transferCosts.put(task1, taskTransferCosts);
+        }
+
+        // Calculating the actual values
+        for (Task parent : pso.taskList) {
+            for (Task child : parent.getChildList()) {
+                transferCosts.get(parent).put(child,
+                        calculateTransferCost(parent, child));
+            }
+        }
+    }
+
+    /**
+     * Accounts the time in seconds necessary to transfer all files described
+     * between parent and child
+     *
+     * @param parent
+     * @param child
+     * @return Transfer cost in seconds
+     */
+    private double calculateAverageBandwidth() {
+        double avg = 0.0;
+        for (Object vmObject : pso.vmList) {
+            CondorVM vm = (CondorVM) vmObject;
+            avg += vm.getBw();
+        }
+        return avg / pso.vmList.size();
+    }
+    
+    private double calculateTransferCost(Task parent, Task child) {
+        List<FileItem> parentFiles = parent.getFileList();
+        List<FileItem> childFiles = child.getFileList();
+
+        double acc = 0.0;
+
+        for (FileItem parentFile : parentFiles) {
+            if (parentFile.getType() != Parameters.FileType.OUTPUT) {
+                continue;
+            }
+
+            for (FileItem childFile : childFiles) {
+                if (childFile.getType() == Parameters.FileType.INPUT
+                        && childFile.getName().equals(parentFile.getName())) {
+                    acc += childFile.getSize();
+                    break;
+                }
+            }
+        }
+
+        //file Size is in Bytes, acc in MB
+        acc = acc / Consts.MILLION;
+        // acc in MB, averageBandwidth in Mb/s
+        return acc * 8 / averageBandwidth;
+    }
+
 	
 	public int hasParent(int k,int[] ET){
 		int flag=0;
@@ -132,27 +232,21 @@ public class CPSOScheduler {
 			
 			for (int i=0; i<dim; i++){
 				for (int j=0; j<res; j++){
-					exeTime[i][j] = (int)((Cloudlet) pso.taskList.get(i)).getCloudletLength(); 
+					Task T = (Task) pso.taskList.get(i);
+					CondorVM R = (CondorVM) pso.vmList.get(j);
+					exeTime[i][j] = (int)Math.ceil(computationCosts.get(T).get(R)); 
 				}
 			}
 			
 			
 			for (int i=0; i<dim; i++){
 				for (int j=0; j<dim; j++){
-					transferTime[i][j] = 0; 
+					Task T1 = (Task) pso.taskList.get(i);
+					Task T2 = (Task) pso.taskList.get(j);
+					transferTime[i][j] = (int)Math.ceil(transferCosts.get(T1).get(T2)); 
 				}
 			}	
 			
-			for (int i=0; i<dim; i++){
-				Task task = (Task) pso.taskList.get(i); 
-				int taskLen = task.getChildList().size();
-				for (int j=0; j<taskLen; j++){
-					Task tChild = task.getChildList().get(j);
-					int k = tChild.getCloudletId();
-					k = (k-1+n)%n;
-					transferTime[i][k] = (int) (Math.random()*10);
-				}
-			}
 	
 			for (int i=0; i<dim; i++){
 				for (int j=0; j<dim; j++){

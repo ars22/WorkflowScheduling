@@ -17,12 +17,7 @@ import org.workflowsim.FileItem;
 import org.workflowsim.Task;
 import org.workflowsim.utils.Parameters;
 
-/**
- * The HEFT planning algorithm.
- *
- * @author Pedro Paulo Vezzá Campos
- * @date Oct 12, 2013
- */
+
 public class CheckpointHEFT extends BasePlanningAlgorithm {
 
     private Map<Task, Map<CondorVM, Double>> computationCosts;
@@ -530,7 +525,8 @@ public class CheckpointHEFT extends BasePlanningAlgorithm {
     				CondorVM vmWithMinEST = vm; 
         			for (int l=0; l<getVmList().size(); l++){
         				if (!failedVmIds.contains(l)){
-        					double EST = findFinishTime(task, (CondorVM)getVmList().get(l), readyTime, false) - task.getCloudletLength();
+        					CondorVM vmConsidered = (CondorVM) getVmList().get(l);
+	        				double EST = findFinishTime(task, (CondorVM)getVmList().get(l), readyTime, false) - computationCosts.get(task).get(vmConsidered);
         					if (EST < minEST){
         						minEST = EST;
         						vmWithMinEST = (CondorVM) getVmList().get(l);
