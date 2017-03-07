@@ -6,6 +6,7 @@ import java.util.List;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.workflowsim.CondorVM;
 import org.workflowsim.FileItem;
+import org.workflowsim.GlobalStatic;
 import org.workflowsim.Job;
 import org.workflowsim.Task;
 import org.workflowsim.WorkflowPlanner;
@@ -22,6 +23,8 @@ public class PSOMain extends BaseSchedulingAlgorithm{
 	int dim,res,deadline=500,iterations=100;
 	WorkflowPlanner planner;
 	List<Task> taskList;
+	List<CondorVM> vmList;
+	
 	
 	
 	public PSOMain(WorkflowPlanner P){
@@ -36,19 +39,21 @@ public class PSOMain extends BaseSchedulingAlgorithm{
 		
 		try {
 	
-		planner.getWorkflowParser().parse();
 		taskList = getCloudletList();
+		vmList = getVmList();
 		n = taskList.size();
+		System.out.println("Task size :" + n);
+		
 		dim = n;
 		res = getVmList().size();		
 		gbest = new Particle(dim, res);
 		particle = new Particle[n];
 		Random rand=new Random();
+		PSOScheduler s=new PSOScheduler(this);
 		
 		for(int g=0;g<iterations;g++){
 			for(int i=0;i<n;i++){
 				particle[i]=new Particle(dim, res);
-				PSOScheduler s=new PSOScheduler(this);
 				//calculating fitness
 				s.Schedulejob(particle[i].pos,i);
 				//3.1
@@ -90,7 +95,7 @@ public class PSOMain extends BaseSchedulingAlgorithm{
 				//System.out.println("pbest="+particle[i].pbestTEC);
 				//3.2
 				if(gbest.TEC > particle[i].pbestTEC){
-					System.out.println("gbest changing");
+					//System.out.println("gbest changing");
 					gbest=particle[i];
 					break;
 					}
@@ -114,6 +119,7 @@ public class PSOMain extends BaseSchedulingAlgorithm{
 				
 				}
 			}
+			System.out.println("gbest.TEC="+gbest.TEC);
 		
 			for (int i=0; i<dim; i++){
 				Cloudlet cloudlet = (Cloudlet) taskList.get(i);
