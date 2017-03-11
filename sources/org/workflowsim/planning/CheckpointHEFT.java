@@ -1,6 +1,7 @@
 package org.workflowsim.planning;
 
 import java.awt.color.CMMException;
+
 import java.security.AllPermission;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,6 +16,7 @@ import org.cloudbus.cloudsim.distributions.WeibullDistr;
 import org.workflowsim.CondorVM;
 import org.workflowsim.FileItem;
 import org.workflowsim.Task;
+import org.workflowsim.planning.heuristics.Clustering;
 import org.workflowsim.utils.Parameters;
 
 
@@ -30,8 +32,8 @@ public class CheckpointHEFT extends BasePlanningAlgorithm {
     private static int repCount = 2;
     private static int mtbf = 60;
     private static int mttr;
-    private static int checkpointDelay = 5;
-    private static int checkpointOverhead = 2;
+    private static int checkpointDelay = 10;
+    private static int checkpointOverhead = 1000;
     
     private class Event {
 
@@ -92,6 +94,9 @@ public class CheckpointHEFT extends BasePlanningAlgorithm {
     @Override
     public void run() {
 
+    	Clustering cluster = new Clustering(getTaskList(), getVmList());
+        cluster.generateClusters();
+        
         averageBandwidth = calculateAverageBandwidth();
 
         for (Object vmObject : getVmList()) {
@@ -106,25 +111,10 @@ public class CheckpointHEFT extends BasePlanningAlgorithm {
 
         
         //calculating chk pt overhead
+        for (Task t: getTaskList())
+        	calculateCheckpointOverhead(t);
         
-        for (int i=0; i<getTaskList().size(); i++){
-			
-			double averageComputationCost = 0.0;
-
-			Task task = getTaskList().get(i);
-			
-	        for (Double cost : computationCosts.get(task).values()) {
-	            averageComputationCost += cost;
-	        }
-
-	        averageComputationCost /= computationCosts.get(task).size();
-			
-			double runTime = averageComputationCost;
-			double checkpointsForTask = runTime/checkpointDelay;
-			getTaskList().get(i).setCloudletLength((long)checkpointsForTask * checkpointOverhead);
-		}
-        
-        
+        calculateComputationCosts();
         // Selection phase
         allocateTasks();
         //calculateSLR();
@@ -148,6 +138,30 @@ public class CheckpointHEFT extends BasePlanningAlgorithm {
      *
      * @return Average available bandwidth in Mbit/s
      */
+    
+    private void calculateCheckpointOverhead(Task task){
+    		
+			double averageComputationCost = 0.0;
+
+			int k=0;
+		    for (Object vm : getVmList()) {
+	            vm = (CondorVM) vm;
+		    	double cost = computationCosts.get(task).get(vm);
+	            if (cost==Double.MAX_VALUE) continue;
+		    	averageComputationCost += cost;
+		    	k++;
+	        }
+
+	        averageComputationCost /= k;
+			
+			double runTime = averageComputationCost;
+			double checkpointsForTask = runTime/checkpointDelay;
+			System.out.println("CHK:"+task.getCloudletId() +"  " +(long)checkpointsForTask * checkpointOverhead + task.getCloudletLength());
+			task.setCloudletLength((long)checkpointsForTask * checkpointOverhead + task.getCloudletLength());
+			
+    }
+    
+    
     private double calculateAverageBandwidth() {
         double avg = 0.0;
         for (Object vmObject : getVmList()) {
@@ -174,7 +188,7 @@ public class CheckpointHEFT extends BasePlanningAlgorithm {
                             task.getCloudletTotalLength() / vm.getMips());
                 }
             }
-            System.out.println("id : "+task.getCloudletId()+" "+task.copyVal+"  "+costsVm);
+            //System.out.println("id : "+task.getCloudletId()+" "+task.copyVal+"  "+costsVm);
             computationCosts.put(task, costsVm);
         }
     }
@@ -291,6 +305,71 @@ public class CheckpointHEFT extends BasePlanningAlgorithm {
         for (TaskRank rank : taskRank) {
         	if (!rank.task.doneScheduling){
                 allocateTask(rank.task);
+                
+                /*
+                 * 
+                 * 
+                 * 
+                 * 
+                 * REPLICATION ALGO STARTS HERE
+                 * 
+                 * 
+                 * 
+                 */
+                
+                Task currentTask = rank.task;
+                for (Task parent : currentTask.getParentList()){
+                	Boolean flag = true;
+                	for (Task child : parent.getChildList()){
+                		if (earliestFinishTimes.containsKey(child)){
+                		}
+                		else{
+                			flag=false;
+                		}
+                	}
+                	if (flag){
+                		
+                		for (int i=0; i<parent.repCount; i++){
+                			Task newTask = new Task(parent);
+                			newTask.setCloudletLength(parent.getCloudletLength());
+                			newTask.copyVal = (i+1);
+                			System.out.println("WTF parent"+parent.getCloudletLength()+" WTF replica "+newTask.getCloudletLength());
+
+                			List <Task> updatedList = getTaskList();
+                			updatedList.add(newTask);
+                			setTaskList(updatedList);
+                			calculateComputationCosts();
+                			calculateTransferCosts();
+                			calculateCheckpointOverhead(newTask);
+                			allocateTask(newTask);
+                			newTask.doneScheduling = true;
+                			for (Object V : getVmList()){
+                				V = (CondorVM) V;
+                				System.out.println("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+                				System.out.println(computationCosts.get(parent).get(V));
+                				System.out.println(computationCosts.get(newTask).get(V));
+                				System.out.println("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+                			}
+                			System.out.println("");
+                				
+                		}
+                	}
+                }
+                
+                
+                 /*
+                 * 
+                 * 
+                 * 
+                 * 
+                 * 
+                 * REPLICATION ENDS HERE
+                 * 
+                 * 
+                 * 
+                 */
+                
+                
                 rank.task.doneScheduling=true;
         	}
 //        	//System.out.println("Allocated "+rank.task.getCloudletId()+" at "+rank.task.getVmId());
@@ -318,7 +397,12 @@ public class CheckpointHEFT extends BasePlanningAlgorithm {
             for (Task parent : task.getParentList()) {
                 double readyTime = earliestFinishTimes.get(parent);
                 if (parent.getVmId() != vm.getId()) {
-                    readyTime += transferCosts.get(parent).get(task);
+                	
+                    try {
+						readyTime += transferCosts.get(parent).get(task);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
                 }
                 minReadyTime = Math.max(minReadyTime, readyTime);
             }

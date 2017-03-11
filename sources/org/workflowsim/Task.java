@@ -38,7 +38,10 @@ public class Task extends Cloudlet {
 	public boolean dontSubmit = false;
 	public boolean doneScheduling = false;
 	public int noOfCheckpointsDone = 0;
-	
+	public int repCount = 0;
+	public int taskIdForCopy;
+	public long taskLengthForCopy;
+
 	public int copyVal=0;
     /*
      * The list of parent tasks. 
@@ -78,6 +81,7 @@ public class Task extends Cloudlet {
      */
     private double taskFinishTime;
 
+    
     /**
      * Allocates a new Task object. The task length should be greater than or
      * equal to 1.
@@ -102,6 +106,9 @@ public class Task extends Cloudlet {
          */
         super(taskId, taskLength, 1, 0, 0, new UtilizationModelFull(), new UtilizationModelFull(), new UtilizationModelFull());
 
+        this.taskLengthForCopy = taskLength;
+    	this.taskIdForCopy = taskId;
+    	
         this.childList = new ArrayList<>();
         this.parentList = new ArrayList<>();
         this.fileList = new ArrayList<>();
@@ -110,14 +117,14 @@ public class Task extends Cloudlet {
     }
     public Task(Task t){
     	
-    	super(t.getCloudletId(), t.getCloudletLength(), 1, 0, 0, new UtilizationModelFull(), new UtilizationModelFull(), new UtilizationModelFull());
-    	this.taskFinishTime = t.taskFinishTime;
+    	super(t.taskIdForCopy, t.taskLengthForCopy, 1, 0, 0, new UtilizationModelFull(), new UtilizationModelFull(), new UtilizationModelFull());
+    	this.taskFinishTime = -1.0;
     	this.parentList = t.parentList;
     	this.childList = t.childList;
     	this.fileList = t.fileList;
     	this.priority = t.priority;
     	this.depth =  t.depth;
-    	this.impact = t.impact;
+    	this.impact = 0.0;
     	this.type = t.type;
         this.setUserId(t.getUserId());
     }

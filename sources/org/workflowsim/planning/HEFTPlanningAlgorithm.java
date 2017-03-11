@@ -24,7 +24,9 @@ import org.cloudbus.cloudsim.Consts;
 import org.cloudbus.cloudsim.Log;
 import org.workflowsim.CondorVM;
 import org.workflowsim.FileItem;
+import org.workflowsim.GlobalStatic;
 import org.workflowsim.Task;
+import org.workflowsim.planning.heuristics.Clustering;
 import org.workflowsim.utils.Parameters;
 
 /**
@@ -82,6 +84,10 @@ public class HEFTPlanningAlgorithm extends BasePlanningAlgorithm {
      */
     @Override
     public void run() {
+    	
+    	//Clustering cluster = new Clustering(getTaskList(), getVmList());
+        //cluster.generateClusters();
+        
         Log.printLine("HEFT planner running with " + getTaskList().size()
                 + " tasks.");
 

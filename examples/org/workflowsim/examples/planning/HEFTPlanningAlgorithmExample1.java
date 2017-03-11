@@ -84,7 +84,7 @@ public class HEFTPlanningAlgorithmExample1 extends WorkflowSimBasicExample1 {
              * the data center or the host doesn't have sufficient resources the
              * exact vmNum would be smaller than that. Take care.
              */
-            int vmNum = 5;//number of vms;
+            int vmNum = 10;//number of vms;
             /**
              * Should change this based on real physical path
              */
@@ -102,7 +102,7 @@ public class HEFTPlanningAlgorithmExample1 extends WorkflowSimBasicExample1 {
              * override the result of the planner
              */
             Parameters.SchedulingAlgorithm sch_method = Parameters.SchedulingAlgorithm.STATIC;
-            Parameters.PlanningAlgorithm pln_method = Parameters.PlanningAlgorithm.CHEFT;
+            Parameters.PlanningAlgorithm pln_method = Parameters.PlanningAlgorithm.HEFT;
             ReplicaCatalog.FileSystem file_system = ReplicaCatalog.FileSystem.LOCAL;
 
             /**

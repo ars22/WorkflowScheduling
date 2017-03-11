@@ -29,7 +29,7 @@ public class CPSOMain extends BaseSchedulingAlgorithm{
 	CParticle gbest, gbestCopy;	
 	CParticle[] particle;
 	int n;
-	int dim,res,deadline=500,iterations=200;
+	int dim,res,deadline=500,iterations=1;
 	WorkflowPlanner planner;
 	List<Task> taskList;
 	List<CondorVM> vmList;

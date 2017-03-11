@@ -6,5 +6,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="lib" path="C:/Users/Sri Ranga Sai/workspace/WorkflowSim-2.0-Local/lib/flanagan.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Sri Ranga Sai/workspace/WorkflowSim-2.0-Local/lib/jdom-2.0.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Sri Ranga Sai/workspace/WorkflowSim-2.0-Local/lib/encog-core-3.3.0/lib/encog-core-3.3.0.jar" sourcepath="lib/encog-core-3.3.0"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

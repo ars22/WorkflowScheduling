@@ -99,7 +99,7 @@ public class WorkflowSimBasicExample1 {
             /**
              * Should change this based on real physical path
              */
-            String daxPath = "C:/Users/Sri Ranga Sai/workspace/WorkflowSim-2.0-Local/config/new_dax/CYBERSHAKE/CYBERSHAKE.n.700.11.dax";
+            String daxPath = "C:/Users/Sri Ranga Sai/workspace/WorkflowSim-2.0-Local/config/new_dax/CYBERSHAKE/CYBERSHAKE.n.200.6.dax";
             File daxFile = new File(daxPath);
             if (!daxFile.exists()) {
                 return;
@@ -110,8 +110,8 @@ public class WorkflowSimBasicExample1 {
              * algorithm should be INVALID such that the planner would not
              * override the result of the scheduler
              */
-            Parameters.SchedulingAlgorithm sch_method = Parameters.SchedulingAlgorithm.PSO;
-            Parameters.PlanningAlgorithm pln_method = Parameters.PlanningAlgorithm.INVALID;
+            Parameters.SchedulingAlgorithm sch_method = Parameters.SchedulingAlgorithm.INVALID;
+            Parameters.PlanningAlgorithm pln_method = Parameters.PlanningAlgorithm.CHEFT;
             ReplicaCatalog.FileSystem file_system = ReplicaCatalog.FileSystem.SHARED;
 
             /**
@@ -157,7 +157,7 @@ public class WorkflowSimBasicExample1 {
              * the scheduler that controls this vm.
              */
             List<CondorVM> vmlist0 = createVM(wfEngine.getSchedulerId(0), Parameters.getVmNum());
-
+            
             /**
              * Submits this list of vms to this WorkflowEngine.
              */
